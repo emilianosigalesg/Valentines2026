@@ -1,12 +1,752 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Day 2026</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Valentine's 2026</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #000;
+      color: #000;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+    }
+    .frame {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      min-height: 90vh;
+      background: #fff;
+      border: 8px solid #000;
+      border-radius: 24px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .screen {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      padding: 20px;
+      padding-bottom: 28px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease-out;
+    }
+    .screen.active {
+      z-index: 1;
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-shrink: 0;
+    }
+    .header .heart { color: #D92927; font-size: 1.1rem; }
+    .header h1 {
+      margin: 0;
+      font-size: clamp(1rem, 4vw, 1.25rem);
+      font-weight: 700;
+      color: #000;
+      text-align: center;
+    }
+    .red-card {
+      background: #D92927;
+      border-radius: 20px;
+      padding: 28px 20px;
+      color: #fff;
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+    }
+    .red-card .line {
+      font-size: clamp(0.95rem, 3.5vw, 1.15rem);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      line-height: 1.35;
+      margin: 0;
+    }
+    .red-card .line + .line { margin-top: 0.5em; }
+    .dots {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #000;
+      transition: background 0.2s;
+    }
+    .dot.filled { background: #000; }
+    .tap-area {
+      cursor: pointer;
+      flex: 1;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .welcome1-message {
+      margin: 0;
+      font-size: clamp(1.25rem, 5vw, 1.75rem);
+      font-weight: 700;
+      color: #000;
+      text-align: center;
+    }
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: #e0e0e0;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .progress-track .fill {
+      height: 100%;
+      background: #333;
+      border-radius: 4px;
+      width: 0%;
+      transition: width 0.25s;
+    }
+    .progress-segments {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      width: 100%;
+      margin-bottom: 24px;
+      height: 8px;
+    }
+    .progress-segments .line {
+      flex: 1;
+      height: 2px;
+      background: #000;
+    }
+    .progress-segments .segment {
+      width: 12px;
+      height: 12px;
+      background: #e0e0e0;
+      border: 1px solid #ccc;
+    }
+    .progress-segments .segment.filled { background: #333; }
+    .word-line {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 24px;
+      font-size: clamp(1.25rem, 5vw, 1.75rem);
+      letter-spacing: 0.15em;
+    }
+    .word-line span {
+      min-width: 1em;
+      text-align: center;
+    }
+    .word-line .blank { color: #999; }
+    .word-line .letter { color: #000; font-weight: 700; }
+    .wrong-box {
+      width: 100%;
+      min-height: 56px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      align-content: flex-start;
+    }
+    .wrong-box .wrong-letter {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #333;
+    }
+    .gray-bottom {
+      flex: 1;
+      min-height: 80px;
+      background: #f0f0f0;
+      margin: 0 -20px -28px;
+      padding: 20px;
+    }
+    .btn-start {
+      display: block;
+      width: 100%;
+      max-width: 200px;
+      margin: 0 auto 20px;
+      padding: 16px 32px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+    .btn-start:active { opacity: 0.9; }
+    #game-letter-input {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      font-size: 1px;
+      border: none;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+    .game-content { flex: 1; display: flex; flex-direction: column; }
+    .game-content .progress-track { flex-shrink: 0; }
+    .game-progress-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 100%;
+      height: 90px;
+      flex-shrink: 0;
+      margin-bottom: 24px;
+    }
+    .game-progress-bar .game-progress-img {
+      width: auto;
+      max-height: 90px;
+      object-fit: contain;
+    }
+    .game-progress-bar .game-progress-left,
+    .game-progress-bar .game-progress-right {
+      max-width: 28%;
+      flex-shrink: 0;
+    }
+    .game-progress-bar .game-progress-track {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      height: 90px;
+      display: flex;
+      align-items: center;
+    }
+    .game-progress-bar .game-progress-avatar {
+      position: absolute;
+      max-height: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: left 0.25s ease-out;
+    }
+    .success-screen .red-card { flex: 0 0 auto; }
+    .success-screen .btn-next {
+      margin-top: 20px;
+      padding: 14px 28px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .cards-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    .cards-viewport {
+      flex: 1;
+      min-height: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+    }
+    .cards-strip {
+      display: flex;
+      width: 400%;
+      height: 100%;
+      min-height: 200px;
+    }
+    .card-slide {
+      flex: 0 0 25%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }
+    .card-slide .red-card.card-content {
+      flex: 0 0 auto;
+      margin: 0;
+    }
+    .card-slide img {
+      max-width: 100%;
+      max-height: 50vh;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+    .card-slide .placeholder-card {
+      width: 100%;
+      max-width: 280px;
+      aspect-ratio: 3/4;
+      background: #f0f0f0;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #999;
+      font-size: 0.9rem;
+    }
+    .card-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      gap: 12px;
+    }
+    .card-nav button {
+      padding: 12px 20px;
+      min-height: 44px;
+      background: #333;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .card-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .game-over-block {
+      background: #000;
+      color: #fff;
+      padding: 32px 24px;
+      border-radius: 16px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .game-over-block h2 {
+      margin: 0 0 20px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+    .btn-restart {
+      display: inline-block;
+      padding: 14px 28px;
+      background: #fff;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      min-height: 44px;
+    }
+    .btn-restart:active { opacity: 0.9; }
+  </style>
 </head>
 <body>
-    <h1>Happy Valentine's Day!</h1>
-    <p>Welcome to the Valentine's Day celebration page for 2026!</p>
+  <div class="frame">
+    <!-- 1. Welcome screen one -->
+    <div id="screen-welcome1" class="screen" aria-hidden="true">
+      <div class="header">
+        <span class="heart" aria-hidden="true">♥</span>
+        <h1>Valentine's 2026</h1>
+        <span class="heart" aria-hidden="true">♥</span>
+      </div>
+      <div class="tap-area" id="welcome1-tap" tabindex="0">
+        <p class="welcome1-message">Te Amo Mariana</p>
+      </div>
+      <div class="dots" id="dots-welcome1">
+        <span class="dot filled" aria-current="true"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+
+    <!-- 2. Welcome screen two -->
+    <div id="screen-welcome2" class="screen" aria-hidden="true">
+      <div class="header">
+        <span class="heart" aria-hidden="true">♥</span>
+        <h1>Valentine's 2026</h1>
+        <span class="heart" aria-hidden="true">♥</span>
+      </div>
+      <div class="tap-area" id="welcome2-tap" tabindex="0">
+        <p class="welcome1-message">By Emiliano X Tecnología</p>
+      </div>
+      <div class="dots" id="dots-welcome2">
+        <span class="dot filled"></span>
+        <span class="dot filled" aria-current="true"></span>
+      </div>
+    </div>
+
+    <!-- 3. START screen -->
+    <div id="screen-start" class="screen" aria-hidden="true">
+      <div class="header">
+        <span class="heart" aria-hidden="true">♥</span>
+        <h1>Valentine's 2026</h1>
+        <span class="heart" aria-hidden="true">♥</span>
+      </div>
+      <button type="button" class="btn-start" id="btn-start">Start</button>
+    </div>
+
+    <!-- 4. Game screen -->
+    <div id="screen-game" class="screen" aria-hidden="true">
+      <div class="header">
+        <span class="heart" aria-hidden="true">♥</span>
+        <h1>Valentine's 2026</h1>
+        <span class="heart" aria-hidden="true">♥</span>
+      </div>
+      <div class="game-content">
+        <div class="game-progress-bar" role="progressbar" aria-valuenow="4" aria-valuemin="0" aria-valuemax="8" id="game-progress">
+          <img class="game-progress-img game-progress-left" src="https://lh3.googleusercontent.com/pw/AP1GczNQtx1M-YCv9jT1k3v_ll9u9rQ-U0nWs7PXoruAvQYRiYKKQsDoaoJeL3kKQUNmk7Fex4-QT_X-ofRdwcrCFylkbQLC5mQnm7lX6xmbI3rlq2SdGJqqCdnmuop-imOiAOUBowc7NpHT20Lsvqm3osl6=w1002-h1506-s-no-gm" alt="">
+          <div class="game-progress-track">
+            <img class="game-progress-img game-progress-avatar" id="game-progress-avatar" src="https://lh3.googleusercontent.com/pw/AP1GczMyDxittvtNj3Z_txs0-uF34WwR3KlOIFEnHNmasPONpIuXW8OoQI6C4zWW8ixuJGAD5CJak9lafv35GOzMPdXRYRaR26AUqxldLFLyEd4NPGHq9DC1DFHWI5xTt_djxWgpaicWOZcG4gPJPcC9WSxN=w912-h1466-s-no-gm" alt="">
+          </div>
+          <img class="game-progress-img game-progress-right" src="https://lh3.googleusercontent.com/pw/AP1GczOB-bcGF4r49jGSNjp8JWijLKK_jCQw_CjD5f7ROvSHAS7ypdSNyCnMqabsyooz2GqKYD8Vt2SWv13rbqtas7uJajlFvdJuugio-2KO-f_s-PxDoeH39JByl5OAi4Qvo04Rt365dHf9HWaAM2Hvh81A=w625-h938-s-no-gm" alt="">
+        </div>
+        <div class="word-line" id="word-line"></div>
+        <div class="wrong-box" id="wrong-letters"></div>
+        <input type="text" id="game-letter-input" maxlength="1" autocomplete="off" autocapitalize="characters" inputmode="text" aria-label="Guess a letter" />
+        <div class="gray-bottom"></div>
+      </div>
+    </div>
+
+    <!-- 5. Successful solution screen -->
+    <div id="screen-success" class="screen success-screen" aria-hidden="true">
+      <div class="header">
+        <span class="heart" aria-hidden="true">♥</span>
+        <h1>Valentine's 2026</h1>
+        <span class="heart" aria-hidden="true">♥</span>
+      </div>
+      <div class="red-card">
+        <p class="line">¡Lo lograste!</p>
+        <p class="line">Te amo, Mariana</p>
+      </div>
+      <button type="button" class="btn-next" id="btn-to-cards">Siguiente</button>
+    </div>
+
+    <!-- 6–9. SUCCESS CARDS pt1–pt4 -->
+    <div id="screen-success-cards" class="screen" aria-hidden="true">
+      <div class="header">
+        <span class="heart" aria-hidden="true">♥</span>
+        <h1>Valentine's 2026</h1>
+        <span class="heart" aria-hidden="true">♥</span>
+      </div>
+      <div class="cards-container">
+        <div class="cards-viewport" id="cards-viewport">
+          <div class="cards-strip">
+            <div class="card-slide" id="card-1" data-card="1">
+              <div class="red-card card-content">
+                <p class="line">Ponte guapa y con algo</p>
+                <p class="line">que estés cómoda</p>
+              </div>
+            </div>
+            <div class="card-slide" id="card-2" data-card="2">
+              <div class="red-card card-content">
+                <p class="line">Taking you out for</p>
+                <p class="line">burgers, photobooth</p>
+                <p class="line">memories & dessert.</p>
+              </div>
+            </div>
+            <div class="card-slide" id="card-3" data-card="3">
+              <div class="red-card card-content">
+                <p class="line">HUNDRED BURGERS.</p>
+                <p class="line">Chamberí, Madrid</p>
+                <p class="line">Feb 13, 2026.</p>
+              </div>
+            </div>
+            <div class="card-slide" id="card-4" data-card="4">
+              <img src="https://lh3.googleusercontent.com/pw/AP1GczNBDzXe0lJRy7tPXHj-IDb22v7PJ0F2_3hWUHSoMAPC-xi6xolf2UD0s6dJYacUCoObAu_pemOhNkn9hDtH5Tgm89IqG_HyWVf9CGbja_IUkgz31IeTxTbOOAHwa7cVun44CcUtWwg2-kHSOWRCVrpm=w1020-h1506-s-no-gm" alt="Success card 4" />
+            </div>
+          </div>
+        </div>
+        <div class="card-nav">
+          <button type="button" id="card-prev">Atrás</button>
+          <button type="button" id="card-next">Siguiente</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 10. Game over screen -->
+    <div id="screen-gameover" class="screen" aria-hidden="true">
+      <div class="header">
+        <span class="heart" aria-hidden="true">♥</span>
+        <h1>Valentine's 2026</h1>
+        <span class="heart" aria-hidden="true">♥</span>
+      </div>
+      <div class="progress-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="8">
+        <div class="fill" style="width: 12%;"></div>
+      </div>
+      <div class="game-over-block">
+        <h2>Game over</h2>
+        <button type="button" class="btn-restart" id="btn-restart">Tap to start again</button>
+      </div>
+      <div class="gray-bottom"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const word = 'PHOTOBOOTH';
+      const MIN_POS = 0;
+      const MAX_POS = 8;
+      const START_POS = 4;
+
+      let currentScreen = 'screen-welcome1';
+      let avatarPosition = START_POS;
+      let correctGuesses = new Set();
+      let wrongGuesses = new Set();
+      let gameOver = false;
+      let currentCard = 1;
+
+      const screens = [
+        'screen-welcome1', 'screen-welcome2', 'screen-start', 'screen-game',
+        'screen-success', 'screen-success-cards', 'screen-gameover'
+      ];
+
+      var cardsViewport = document.getElementById('cards-viewport');
+      var cardPrevBtn = document.getElementById('card-prev');
+      var cardNextBtn = document.getElementById('card-next');
+
+      function updateCardButtons() {
+        if (cardPrevBtn) cardPrevBtn.disabled = currentCard <= 1;
+        if (cardNextBtn) cardNextBtn.disabled = currentCard >= 4;
+      }
+
+      function syncCardFromScroll() {
+        if (!cardsViewport) return;
+        var w = cardsViewport.clientWidth;
+        if (w <= 0) return;
+        var index = Math.round(cardsViewport.scrollLeft / w);
+        index = Math.max(0, Math.min(3, index));
+        currentCard = index + 1;
+        updateCardButtons();
+      }
+
+      function showScreen(id) {
+        currentScreen = id;
+        screens.forEach(function (s) {
+          var el = document.getElementById(s);
+          var active = s === id;
+          el.classList.toggle('active', active);
+          el.setAttribute('aria-hidden', active ? 'false' : 'true');
+        });
+        if (id === 'screen-game') {
+          updateProgressFill();
+          var gameInput = document.getElementById('game-letter-input');
+          if (gameInput) {
+            requestAnimationFrame(function () {
+              gameInput.focus();
+            });
+          }
+        } else {
+          var gameInput = document.getElementById('game-letter-input');
+          if (gameInput) gameInput.blur();
+        }
+        if (id === 'screen-success-cards' && cardsViewport) {
+          currentCard = 1;
+          updateCardButtons();
+          requestAnimationFrame(function () {
+            if (cardsViewport) cardsViewport.scrollLeft = 0;
+          });
+        }
+      }
+
+      var avatarImg = document.getElementById('game-progress-avatar');
+
+      function updateProgressFill() {
+        var pct = (avatarPosition / MAX_POS) * 100;
+        if (avatarImg) avatarImg.style.left = pct + '%';
+        var bar = document.getElementById('game-progress');
+        if (bar) {
+          bar.setAttribute('aria-valuenow', avatarPosition);
+        }
+      }
+
+      function initGame() {
+        avatarPosition = START_POS;
+        correctGuesses.clear();
+        wrongGuesses.clear();
+        gameOver = false;
+        updateProgressFill();
+        renderWord();
+        renderWrong();
+      }
+
+      var wordLineEl = document.getElementById('word-line');
+      var wrongLettersEl = document.getElementById('wrong-letters');
+
+      function renderWord() {
+        if (!wordLineEl) return;
+        wordLineEl.innerHTML = '';
+        for (var i = 0; i < word.length; i++) {
+          var c = word[i];
+          var span = document.createElement('span');
+          if (correctGuesses.has(c)) {
+            span.textContent = c;
+            span.classList.add('letter');
+          } else {
+            span.textContent = '_';
+            span.classList.add('blank');
+          }
+          wordLineEl.appendChild(span);
+        }
+      }
+
+      function renderWrong() {
+        if (!wrongLettersEl) return;
+        wrongLettersEl.innerHTML = '';
+        var sorted = Array.from(wrongGuesses).sort();
+        for (var i = 0; i < sorted.length; i++) {
+          var span = document.createElement('span');
+          span.className = 'wrong-letter';
+          span.textContent = sorted[i];
+          wrongLettersEl.appendChild(span);
+        }
+      }
+
+      function checkWin() {
+        var unique = new Set(word);
+        for (var c of unique) if (!correctGuesses.has(c)) return false;
+        return true;
+      }
+
+      function processLetter(key) {
+        if (currentScreen !== 'screen-game' || gameOver) return;
+        if (key.length !== 1 || key < 'A' || key > 'Z') return;
+        if (correctGuesses.has(key) || wrongGuesses.has(key)) return;
+
+        if (word.indexOf(key) !== -1) {
+          correctGuesses.add(key);
+          avatarPosition = Math.min(MAX_POS, avatarPosition + 1);
+          updateProgressFill();
+          renderWord();
+          if (checkWin()) {
+            gameOver = true;
+            showScreen('screen-success');
+          }
+        } else {
+          wrongGuesses.add(key);
+          avatarPosition = Math.max(MIN_POS, avatarPosition - 1);
+          updateProgressFill();
+          renderWrong();
+          if (avatarPosition === MIN_POS) {
+            gameOver = true;
+            showScreen('screen-gameover');
+          }
+        }
+      }
+
+      function handleKeydown(e) {
+        var key = (e.key || '').toUpperCase();
+        if (key.length !== 1 || key < 'A' || key > 'Z') return;
+        processLetter(key);
+      }
+
+      document.addEventListener('keydown', handleKeydown);
+
+      var gameLetterInput = document.getElementById('game-letter-input');
+      if (gameLetterInput) {
+        gameLetterInput.addEventListener('input', function () {
+          var val = (this.value || '').toUpperCase();
+          if (val.length >= 1) {
+            var c = val.charAt(val.length - 1);
+            if (c >= 'A' && c <= 'Z') {
+              processLetter(c);
+              this.value = '';
+            }
+          }
+        });
+        gameLetterInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') e.preventDefault();
+        });
+      }
+
+      document.getElementById('welcome1-tap').addEventListener('click', function () {
+        showScreen('screen-welcome2');
+      });
+      document.getElementById('welcome2-tap').addEventListener('click', function () {
+        showScreen('screen-start');
+      });
+
+      document.getElementById('btn-start').addEventListener('click', function () {
+        initGame();
+        showScreen('screen-game');
+      });
+
+      document.getElementById('btn-to-cards').addEventListener('click', function () {
+        showScreen('screen-success-cards');
+      });
+
+      function scrollToCard(index) {
+        currentCard = index;
+        updateCardButtons();
+        if (cardsViewport) {
+          var left = (index - 1) * cardsViewport.clientWidth;
+          cardsViewport.scrollTo({ left: left, behavior: 'smooth' });
+        }
+      }
+
+      if (cardsViewport) {
+        cardsViewport.addEventListener('scroll', syncCardFromScroll);
+      }
+
+      window.addEventListener('resize', function () {
+        if (currentScreen === 'screen-success-cards' && cardsViewport) {
+          var left = (currentCard - 1) * cardsViewport.clientWidth;
+          cardsViewport.scrollLeft = left;
+        }
+      });
+
+      document.getElementById('card-prev').addEventListener('click', function () {
+        if (currentCard > 1) scrollToCard(currentCard - 1);
+      });
+      document.getElementById('card-next').addEventListener('click', function () {
+        if (currentCard < 4) scrollToCard(currentCard + 1);
+      });
+
+      document.getElementById('btn-restart').addEventListener('click', function () {
+        showScreen('screen-start');
+      });
+
+      renderWord();
+      updateProgressFill();
+      requestAnimationFrame(function () {
+        showScreen('screen-welcome1');
+      });
+    })();
+  </script>
 </body>
 </html>
