@@ -210,20 +210,32 @@
       cursor: pointer;
     }
     .btn-start:active { opacity: 0.9; }
-    #game-letter-input {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      font-size: 1px;
-      border: none;
-      padding: 0;
-      margin: 0;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
+    .game-keyboard {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-shrink: 0;
+    }
+    .game-keyboard button {
+      min-height: 44px;
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      color: #333;
+      background: #fff;
+      border: 2px solid #333;
+      border-radius: 10px;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .game-keyboard button:active:not(:disabled) { background: #eee; }
+    .game-keyboard button:disabled,
+    .game-keyboard button.key-used {
+      opacity: 0.4;
+      pointer-events: none;
+      cursor: default;
     }
     .game-content { flex: 1; display: flex; flex-direction: column; }
     .game-content .progress-track { flex-shrink: 0; }
@@ -438,7 +450,7 @@
         </div>
         <div class="word-line" id="word-line"></div>
         <div class="wrong-box" id="wrong-letters"></div>
-        <input type="text" id="game-letter-input" maxlength="1" autocomplete="off" autocapitalize="characters" inputmode="text" aria-label="Guess a letter" />
+        <div id="game-keyboard" class="game-keyboard" aria-label="Letter keyboard"></div>
         <div class="gray-bottom"></div>
       </div>
     </div>
@@ -565,15 +577,6 @@
         });
         if (id === 'screen-game') {
           updateProgressFill();
-          var gameInput = document.getElementById('game-letter-input');
-          if (gameInput) {
-            requestAnimationFrame(function () {
-              gameInput.focus();
-            });
-          }
-        } else {
-          var gameInput = document.getElementById('game-letter-input');
-          if (gameInput) gameInput.blur();
         }
         if (id === 'screen-success-cards' && cardsViewport) {
           currentCard = 1;
@@ -603,6 +606,7 @@
         updateProgressFill();
         renderWord();
         renderWrong();
+        updateKeyboardKeys();
       }
 
       var wordLineEl = document.getElementById('word-line');
@@ -667,6 +671,19 @@
             showScreen('screen-gameover');
           }
         }
+        updateKeyboardKeys();
+      }
+
+      function updateKeyboardKeys() {
+        var keyboard = document.getElementById('game-keyboard');
+        if (!keyboard) return;
+        var buttons = keyboard.querySelectorAll('button[data-letter]');
+        for (var i = 0; i < buttons.length; i++) {
+          var letter = buttons[i].getAttribute('data-letter');
+          var used = correctGuesses.has(letter) || wrongGuesses.has(letter);
+          buttons[i].disabled = used;
+          buttons[i].classList.toggle('key-used', used);
+        }
       }
 
       function handleKeydown(e) {
@@ -677,22 +694,31 @@
 
       document.addEventListener('keydown', handleKeydown);
 
-      var gameLetterInput = document.getElementById('game-letter-input');
-      if (gameLetterInput) {
-        gameLetterInput.addEventListener('input', function () {
-          var val = (this.value || '').toUpperCase();
-          if (val.length >= 1) {
-            var c = val.charAt(val.length - 1);
-            if (c >= 'A' && c <= 'Z') {
-              processLetter(c);
-              this.value = '';
-            }
+      (function setupGameKeyboard() {
+        var keyboard = document.getElementById('game-keyboard');
+        if (!keyboard) return;
+        var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        for (var i = 0; i < letters.length; i++) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.setAttribute('data-letter', letters[i]);
+          btn.textContent = letters[i];
+          keyboard.appendChild(btn);
+        }
+        keyboard.addEventListener('click', function (e) {
+          var target = e.target;
+          if (target.matches('button[data-letter]')) {
+            processLetter(target.getAttribute('data-letter'));
           }
         });
-        gameLetterInput.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') e.preventDefault();
-        });
-      }
+        keyboard.addEventListener('touchend', function (e) {
+          var target = e.target;
+          if (target.matches('button[data-letter]')) {
+            e.preventDefault();
+            processLetter(target.getAttribute('data-letter'));
+          }
+        }, { passive: false });
+      })();
 
       document.getElementById('welcome1-tap').addEventListener('click', function () {
         showScreen('screen-welcome2');
